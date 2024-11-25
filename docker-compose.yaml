@@ -1,0 +1,38 @@
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+services:
+  app:
+    build: ./
+    container_name: sh-app
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      
+    depends_on:
+      - postgres
+      - redis
+  
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: sh-psql
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=shupir
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data-volume:/var/lib/postgresql/data
+  redis:
+    image: redis/redis-stack:latest
+    container_name: sh-redis
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+  
+volumes:
+  data-volume:

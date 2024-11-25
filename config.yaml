@@ -1,0 +1,41 @@
+http:
+  address:  ":8080"
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+
+log_level:    "debug"
+
+token:
+  token_secret_key:  "12345678901234567890123456789012"
+  access_token_duration:  "2016h"
+  refresh_token_duration: "2016h"
+
+cookie:
+  authcookie_name:  "shgoCookieAuth"
+  authcookie_path:  "/"
+  authcookie_domain:  "localhost"
+  accessname: "shgocookieaccess"
+  access_ttl: 259200
+  refreshname:  "shgocookierefresh"
+  refresh_ttl: 2592000
+  
+storage:
+  username: "root"
+  # host: "localhost"  # when running the app without docker 
+  host: "postgres"
+  password: "secret"
+  port: "5432"
+  database: "shupir"
+  ssl_mode: "disable"
+
+flashcall:
+  public_key: "a9f360a3fcc7506d5be249238ccc96b9"
+  campaign_id:  "275753919"
+
+redis:
+  # host: "localhost"  # when running the app without docker 
+  host: "redis"
+  port: "6379"
+  expired_at: "1h"
+  password: "redispassword"

@@ -1,0 +1,745 @@
+basePath: /v1
+definitions:
+  db.User:
+    properties:
+      blocked_reason:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      is_blocked:
+        type: boolean
+      name:
+        type: string
+      phone:
+        type: string
+      role:
+        type: string
+      status_text:
+        type: string
+    type: object
+  db.Vehicle:
+    properties:
+      brand:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      number:
+        type: string
+      region:
+        type: integer
+      type:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entity.Chat:
+    properties:
+      from:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      timestamp:
+        type: integer
+      to:
+        type: string
+    type: object
+  entity.ContactList:
+    properties:
+      last_activity:
+        type: integer
+      username:
+        type: string
+    type: object
+  httpServer.Err:
+    properties:
+      message:
+        type: string
+    type: object
+  httpServer.Error:
+    properties:
+      error:
+        $ref: '#/definitions/httpServer.Err'
+    type: object
+  service.stickerData:
+    properties:
+      sticker:
+        type: string
+    type: object
+  v1.Pagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      totalPage:
+        type: integer
+    type: object
+  v1.appVerion:
+    properties:
+      min_version:
+        type: string
+      version:
+        type: string
+    type: object
+  v1.createUserrequest:
+    properties:
+      image_url:
+        type: string
+      name:
+        type: string
+      status_text:
+        type: string
+    required:
+    - name
+    type: object
+  v1.loginRequest:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  v1.refreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  v1.updateUserDataRequest:
+    properties:
+      name:
+        type: string
+      status_text:
+        type: string
+    type: object
+  v1.updateUserImgRequest:
+    properties:
+      image_url:
+        type: string
+    required:
+    - image_url
+    type: object
+  v1.updateUserPhoneRequest:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
+    type: object
+  v1.vehicleCreateRequest:
+    properties:
+      brand:
+        type: string
+      country:
+        type: string
+      number:
+        type: string
+      region:
+        type: integer
+      type:
+        description: TODO which fields are required?
+        type: string
+    required:
+    - number
+    type: object
+  v1.vehicleDeleteRequest:
+    properties:
+      id:
+        type: string
+    required:
+    - id
+    type: object
+  v1.vehicleRequest:
+    properties:
+      number:
+        type: string
+      region:
+        type: integer
+    required:
+    - number
+    type: object
+  v1.vehicleResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/v1.Pagination'
+      vehicles:
+        items:
+          $ref: '#/definitions/db.Vehicle'
+        type: array
+    type: object
+  v1.vehicleUpdateRequest:
+    properties:
+      brand:
+        type: string
+      country:
+        type: string
+      id:
+        type: string
+      number:
+        type: string
+      region:
+        type: integer
+      type:
+        type: string
+    required:
+    - id
+    type: object
+  v1.verifyUserPhoneRequest:
+    properties:
+      pincode:
+        type: string
+    required:
+    - pincode
+    type: object
+  v1.verifyUserRequest:
+    properties:
+      pincode:
+        type: string
+      sticker:
+        type: string
+    required:
+    - pincode
+    - sticker
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API docs for Shupir Application.
+  title: Shupir app API
+  version: "1.0"
+paths:
+  /app/version:
+    get:
+      description: App version information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.appVerion'
+      summary: Version
+      tags:
+      - version
+  /auth/create:
+    post:
+      consumes:
+      - application/json
+      description: Check JWT token and update user fieldsand and also sets authentication
+        cookies
+      parameters:
+      - description: ' Name is required, while ImageUrl and StatusText are optional'
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.createUserrequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Create user
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Create user if user doesnt exist and return id.This endpoint also
+        generate pincode and send it to user
+      parameters:
+      - description: phone number
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: sticker
+          schema:
+            $ref: '#/definitions/service.stickerData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      summary: Login
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Accept refresh_token and set AccessToken and RefreshToken in cookie
+      parameters:
+      - description: refresh_token
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.refreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns nil and sets authentication cookies
+          schema:
+            type: nil
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      summary: Refresh token
+      tags:
+      - auth
+  /auth/verify:
+    post:
+      consumes:
+      - application/json
+      description: Compare pincode by sticker(id) and return user. This endpoint also
+        sets authentication cookies.
+      parameters:
+      - description: sticker & pincode
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.verifyUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns user object and sets authentication cookies
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      summary: Verify user
+      tags:
+      - auth
+  /chat/chat-history:
+    get:
+      consumes:
+      - application/json
+      description: Chat history
+      parameters:
+      - description: used id
+        in: query
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chat'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Chat history
+      tags:
+      - chat
+  /chat/contact-list:
+    get:
+      consumes:
+      - application/json
+      description: Contact lists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.ContactList'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Contact lists
+      tags:
+      - chat
+  /user/update-data:
+    put:
+      consumes:
+      - application/json
+      description: Update users name & status_text
+      parameters:
+      - description: users name & status_text fields are optional
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.updateUserDataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns user object
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update  data
+      tags:
+      - user
+  /user/update-img:
+    put:
+      consumes:
+      - application/json
+      description: Update users image
+      parameters:
+      - description: image_url
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.updateUserImgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns user object
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update image
+      tags:
+      - user
+  /user/update-phone:
+    put:
+      consumes:
+      - application/json
+      description: Generate pincode and send it to user
+      parameters:
+      - description: New phone number
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.updateUserPhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: nil
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update phone
+      tags:
+      - user
+  /user/verify-phone:
+    put:
+      consumes:
+      - application/json
+      description: Compare pincode and reset phone
+      parameters:
+      - description: pincode
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.verifyUserPhoneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns user object
+          schema:
+            $ref: '#/definitions/db.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Verify phone
+      tags:
+      - user
+  /vehicle/create:
+    post:
+      consumes:
+      - application/json
+      description: Create vehicle
+      parameters:
+      - description: Brand, Region, Country fields are optional
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.vehicleCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Vehicle'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Create vehicle
+      tags:
+      - vehicle
+  /vehicle/delete:
+    post:
+      consumes:
+      - application/json
+      description: Delete vehicle by id
+      parameters:
+      - description: vehicle id
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.vehicleDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: nil
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete vehicle
+      tags:
+      - vehicle
+  /vehicle/page:
+    post:
+      consumes:
+      - application/json
+      description: Find vehicle by number and region
+      parameters:
+      - description: count of vehicles
+        in: query
+        name: limit
+        required: true
+        type: string
+      - description: page of vehicles
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: Region is optional
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.vehicleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.vehicleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      summary: Find vehicle
+      tags:
+      - vehicle
+  /vehicle/update:
+    put:
+      consumes:
+      - application/json
+      description: Update vehicle by id
+      parameters:
+      - description: Only ID is required
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.vehicleUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Vehicle'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpServer.Error'
+      security:
+      - ApiKeyAuth: []
+      summary: Update vehicle
+      tags:
+      - vehicle
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
